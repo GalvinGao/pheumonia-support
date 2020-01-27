@@ -9,7 +9,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dchest/uniuri"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -151,7 +150,6 @@ func main() {
 		Logger.Printf("failed to create folder: %v", err)
 	}
 
-	rand.Seed(time.Now().UnixNano())
 	ticker := time.NewTicker(interval)
 	get()
 
