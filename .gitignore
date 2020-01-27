@@ -2,3 +2,4 @@ dxy_scrape/data/
 logs/
 *.log
 .idea/
+shimo2csv/config.json

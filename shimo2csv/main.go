@@ -15,10 +15,6 @@ import (
 	"time"
 )
 
-const (
-	cookie = "xxx" // input your cookie here
-)
-
 var (
 	client = http.Client{
 		Timeout: time.Minute,
@@ -26,10 +22,15 @@ var (
 	Logger     *log.Logger
 	folder     = "files/"
 	sheetIndex int
+	config     Config
 )
 
 type Response struct {
 	DownloadURL string `json:"downloadUrl"`
+}
+
+type Config struct {
+	Cookie string `json:"cookie"`
 }
 
 func get(name string, guid string) {
@@ -49,7 +50,7 @@ func get(name string, guid string) {
 		Logger.Printf("failed to fetch http resource: %v", err)
 		panic(err)
 	}
-	request.Header.Set("Cookie", cookie)
+	request.Header.Set("Cookie", config.Cookie)
 	request.Header.Set("Referer", fmt.Sprintf("https://shimo.im/sheets/%s/MODOC", guid))
 
 	response, err := client.Do(request)
@@ -119,7 +120,7 @@ func parse(name string, response *http.Response) {
 }
 
 func main() {
-	if len(os.Args) < 2 + 1 {
+	if len(os.Args) < 2+1 {
 		panic("not enough argument. usage: ./executable [guid] [name] (sheetId)")
 	}
 	guid := os.Args[1]
@@ -147,12 +148,22 @@ func main() {
 		sheetIndex = int(s)
 		Logger.Printf("set sheetIndex id to %v", sheetIndex)
 	}
+
+	bytes, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		panic("config file: " + err.Error())
+	}
+	err = json.Unmarshal(bytes, &config)
+	if err != nil {
+		panic(err)
+	}
+
 	Logger.Printf("converting shimo.im document, guid %s, name %s", guid, name)
 
-	err := os.MkdirAll(folder, 0755)
+	err = os.MkdirAll(folder, 0755)
 	if err != nil {
 		Logger.Printf("failed to create folder: %v", err)
 	}
 	get(name, guid)
-	Logger.Printf("converted file and saved at %s", filepath.Join(folder, name + ".csv"))
+	Logger.Printf("converted file and saved at %s", filepath.Join(folder, name+".csv"))
 }
